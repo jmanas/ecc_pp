@@ -1,6 +1,10 @@
 from random import randint
 from collections import namedtuple
 
+def inv(x, p):
+    """ inverse of x """
+    return pow(x, p - 2, p)
+
 Point = namedtuple("Point", "x y")
 
 # The point at infinity 
@@ -26,20 +30,6 @@ class ECC:
         right = (P.x ** 3 + a * P.x + b) % p
         return left == right
 
-    def _egcd(self, a, b):
-        if a == 0:
-            return (b, 0, 1)
-        g, y, x = self._egcd(b % a, a)
-        return (g, x - (b // a) * y, y)
-
-    def _inv(self, a):
-        """ inverse of x modulo p """
-        if a < 0:
-            a+= self.p
-        g, x, y = self._egcd(a, self.p)
-        assert g == 1
-        return x % self.p
-
     def neg(self, P):
         """ inverse of point P """
         if P == O:
@@ -64,9 +54,9 @@ class ECC:
     
         # Cases not involving the origin
         if P.x == Q.x:
-            dydx = (3 * P.x ** 2 + a) * self._inv(2 * P.y)
+            dydx = (3 * P.x ** 2 + a) * inv(2 * P.y, p)
         else:
-            dydx = (Q.y - P.y) * self._inv(Q.x - P.x)
+            dydx = (Q.y - P.y) * inv(Q.x - P.x, p)
         x = (dydx ** 2 - P.x - Q.x) % p
         y = (dydx * (P.x - x) - P.y) % p
         return Point(x, y)
